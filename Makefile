@@ -1,6 +1,8 @@
 .PHONY: image
 
 
+all: image
+
 archives/munge-0.5.12.tar.xz:
 	curl -L -C - -o $@ "https://github.com/dun/munge/releases/download/munge-0.5.12/munge-0.5.12.tar.xz"
 
