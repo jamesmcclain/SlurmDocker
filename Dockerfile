@@ -11,7 +11,7 @@ RUN cd /root/local/src/slurm-slurm-17-02-6-1 && ./configure --prefix=/usr/local 
 RUN useradd munge -m && useradd slurm -m
 
 COPY scripts/munged.sh /scripts/munged.sh
+COPY scripts/slurm-config.sh /scripts/slurm-config.sh
 COPY scripts/leader.sh /scripts/leader.sh
 COPY scripts/follower.sh /scripts/follower.sh
-COPY config/slurm.conf /usr/local/etc/
-
+COPY config/slurm.conf.template /usr/local/etc/
