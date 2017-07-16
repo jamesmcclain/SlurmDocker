@@ -2,7 +2,7 @@
 # Put this file on all nodes of your cluster.
 # See the slurm.conf man page for more information.
 #
-ControlMachine=leader
+ControlMachine=XXX
 #ControlAddr=
 #BackupController=
 #BackupAddr=
@@ -157,5 +157,5 @@ SlurmdDebug=3
 # 
 # 
 # COMPUTE NODES 
-NodeName=XXX YYY State=UNKNOWN 
-PartitionName=queue Nodes=XXX Default=YES MaxTime=INFINITE State=UP
+NodeName=YYY ZZZ State=UNKNOWN 
+PartitionName=queue Nodes=YYY Default=YES MaxTime=INFINITE State=UP
