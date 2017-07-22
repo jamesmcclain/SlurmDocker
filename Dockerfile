@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y gcc libgcrypt20-dev libncurses5-dev mak
 ADD archives/munge-0.5.12.tar.xz /root/local/src/
 ADD archives/slurm-17-02-6-1.tar.gz /root/local/src/
 
-RUN cd /root/local/src/munge-0.5.12 && ./configure --prefix=/usr/local && make -j && make install
-RUN cd /root/local/src/slurm-slurm-17-02-6-1 && ./configure --prefix=/usr/local && make -j && make install && ldconfig -n /usr/local/lib
+RUN cd /root/local/src/munge-0.5.12 && ./configure --prefix=/usr/local && make -j && make install && (cd ; rm -rf /root/local/src/munge-0.5.12)
+RUN cd /root/local/src/slurm-slurm-17-02-6-1 && ./configure --prefix=/usr/local && make -j && make install && ldconfig -n /usr/local/lib && (cd ; rm -rf /root/local/src/slurm-slurm-17-02-6-1)
 RUN useradd munge -m && useradd slurm -m && mkdir /tmp/slurm && chown slurm:slurm -R /tmp/slurm
 
 COPY scripts/munged.sh /scripts/munged.sh
