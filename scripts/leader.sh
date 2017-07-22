@@ -4,3 +4,4 @@
 /scripts/munged.sh $4
 /usr/local/sbin/slurmctld
 /usr/local/sbin/slurmd
+bash
