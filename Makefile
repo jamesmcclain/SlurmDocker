@@ -17,7 +17,7 @@ image: archives/munge-0.5.12.tar.xz archives/slurm-17-02-6-1.tar.gz
 	docker build \
            -t jamesmcclain/slurm:0 -f Dockerfile .
 
-ec2-leader:
+ec2-leader-start:
 	sed -e "s/XXX/$(REGION)/" $(shell pwd)/scripts/leader-bootstrap.sh.template > /tmp/leader-bootstrap.sh
 	aws ec2 run-instances \
            --image-id $(LEADER_AMI) \
@@ -30,6 +30,5 @@ ec2-leader:
            --count 1
 	# aws ec2 describe-instances --filters "Name=tag:Purpose,Values=test"
 
-ec2-stop:
-	# aws ec2 describe-instances | jq '.Reservations[].Instances[].InstanceId'
-	# aws ec2 terminate-instances --instance-ids ...
+ec2-leader-stop:
+	aws ec2 terminate-instances --instance-ids $(shell aws ec2 describe-instances --filter Name="tag:slurm",Values="leader" Name="instance-state-name",Values="running" | jq '.Reservations[].Instances[].InstanceId' | tr -d '"')
