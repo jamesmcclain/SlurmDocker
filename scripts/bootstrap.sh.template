@@ -12,10 +12,7 @@ EOF
 
 LEADER=$(aws ec2 describe-instances --filters "Name=tag:slurm,Values=leader" Name="instance-state-name",Values="pending,running" | jq '.Reservations[].Instances[].PrivateDnsName' | tr -d '"' | sed 's/.ec2.internal//')
 
-echo hello > /tmp/debug.txt # DEBUG
 while [[ -z $NODES ]]; do
-    aws ec2 describe-instances --filters "Name=tag:slurm,Values=follower" Name="instance-state-name",Values="pending,running" | jq '.Reservations[].Instances[].PrivateDnsName' | tr -d '"' | sed 's/.ec2.internal//' >> /tmp/debug.txt # DEBUG
-
     for node in $(aws ec2 describe-instances --filters "Name=tag:slurm,Values=follower" Name="instance-state-name",Values="pending,running" | jq '.Reservations[].Instances[].PrivateDnsName' | tr -d '"' | sed 's/.ec2.internal//'); do
 	if [[ -z $NODES ]]; then
 	    NODES=$node
@@ -25,14 +22,13 @@ while [[ -z $NODES ]]; do
     done
 
     if [[ -z $NODES ]]; then
-	echo $NODES >> /tmp/debug.txt # DEBUG
 	sleep 10s
     fi
 done
 NODES=$LEADER,$NODES
 
 if [ $HOSTNAME == $LEADER ]; then
-    docker run -p 6817:6817 -p 6818:6818 -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/leader.sh $LEADER $NODES CPUs=1
+    docker run -p 6817:6817 -p 6818:6818 -p 33009-33013:33009-33013 -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/leader.sh $LEADER $NODES CPUs=1
 else
     docker run -p 6818:6818 -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/follower.sh $LEADER $NODES CPUs=1
 fi

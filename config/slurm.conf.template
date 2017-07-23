@@ -54,6 +54,7 @@ SlurmdPidFile=/tmp/slurmd.pid
 SlurmdPort=6818
 SlurmdSpoolDir=/tmp
 SlurmUser=slurm
+SrunPortRange=33009-33013
 #SlurmdUser=root 
 #SrunEpilog=
 #SrunProlog=
