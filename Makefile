@@ -1,8 +1,11 @@
 LEADER_AMI ?= "ami-a4c7edb2"
 LEADER_TYPE ?= "t2.micro"
+FOLLOWER_AMI ?= "ami-a4c7edb2"
+FOLLOWER_TYPE ?= "t2.micro"
 REGION = us-east-1
+NODES = 2
 
-.PHONY: image ec2-start ec2-stop
+.PHONY: image start-leader-ec2 start-followers-ec2 start-ec2 stop-ec2
 
 
 all: image
@@ -17,18 +20,31 @@ image: archives/munge-0.5.12.tar.xz archives/slurm-17-02-6-1.tar.gz
 	docker build \
            -t jamesmcclain/slurm:0 -f Dockerfile .
 
-ec2-leader-start:
-	sed -e "s/XXX/$(REGION)/" $(shell pwd)/scripts/leader-bootstrap.sh.template > /tmp/leader-bootstrap.sh
+start-leader-ec2:
+	sed -e "s/XXX/$(REGION)/" $(shell pwd)/scripts/bootstrap.sh.template > /tmp/leader-bootstrap.sh
 	aws ec2 run-instances \
            --image-id $(LEADER_AMI) \
            --instance-type $(LEADER_TYPE) \
            --key-name $(KEYPAIR) \
-           --security-groups $(SECURITY_GROUP_NAME) \
+           --security-groups $(SECURITY_GROUP) \
            --tag-specifications 'ResourceType=instance,Tags=[{Key=slurm,Value=leader}]' \
            --iam-instance-profile Name=$(INSTANCE_PROFILE) \
            --user-data file:///tmp/leader-bootstrap.sh \
            --count 1
-	# aws ec2 describe-instances --filters "Name=tag:Purpose,Values=test"
 
-ec2-leader-stop:
-	aws ec2 terminate-instances --instance-ids $(shell aws ec2 describe-instances --filter Name="tag:slurm",Values="leader" Name="instance-state-name",Values="running" | jq '.Reservations[].Instances[].InstanceId' | tr -d '"')
+start-followers-ec2:
+	sed -e "s/XXX/$(REGION)/" $(shell pwd)/scripts/bootstrap.sh.template > /tmp/follower-bootstrap.sh
+	aws ec2 run-instances \
+           --image-id $(FOLLOWER_AMI) \
+           --instance-type $(FOLLOWER_TYPE) \
+           --key-name $(KEYPAIR) \
+           --security-groups $(SECURITY_GROUP) \
+           --tag-specifications 'ResourceType=instance,Tags=[{Key=slurm,Value=follower}]' \
+           --iam-instance-profile Name=$(INSTANCE_PROFILE) \
+           --user-data file:///tmp/follower-bootstrap.sh \
+           --count $(NODES)
+
+start-ec2: start-leader-ec2 start-followers-ec2
+
+stop-ec2:
+	./scripts/stop.sh
