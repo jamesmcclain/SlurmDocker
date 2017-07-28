@@ -2,8 +2,8 @@ LEADER_AMI ?= "ami-a4c7edb2"
 LEADER_TYPE ?= "t2.micro"
 FOLLOWER_AMI ?= "ami-a4c7edb2"
 FOLLOWER_TYPE ?= "t2.micro"
-REGION = us-east-1
-NODES = 2
+REGION ?= us-east-1
+NODES ?= 2
 
 .PHONY: image start-leader-ec2 start-followers-ec2 start-ec2 stop-ec2
 
