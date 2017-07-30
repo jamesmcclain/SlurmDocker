@@ -28,7 +28,7 @@ done
 NODES=$LEADER,$NODES
 
 if [ $HOSTNAME == $LEADER ]; then
-    docker run -p 6817:6817 -p 6818:6818 -p 33009-33013:33009-33013 -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/leader.sh $LEADER $NODES CPUs=1
+    docker run --net=host -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/leader.sh $LEADER $NODES CPUs=1
 else
-    docker run -p 6818:6818 -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/follower.sh $LEADER $NODES CPUs=1
+    docker run --net=host -it -d --name $HOSTNAME --hostname $HOSTNAME jamesmcclain/slurm:0 /scripts/follower.sh $LEADER $NODES CPUs=1
 fi

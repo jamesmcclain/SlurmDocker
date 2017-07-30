@@ -23,8 +23,8 @@ RUN cd /root/local/src && tar axvf /root/openmpi-2.1.1.tar.bz2 && cd /root/local
     make -j && make install && \
     cd /root && rm -rf /root/local/src/openmpi-2.1.1
 
-RUN cp /usr/local/lib/libmpi_usempif08.so.20 /usr/lib/libmpi_usempi.so.20 && \
-    ldconfig
+RUN echo 'btl_tcp_if_exclude = lo,docker0' >> /usr/local/etc/openmpi-mca-params.conf
+RUN cp /usr/local/lib/libmpi_usempif08.so.20 /usr/lib/libmpi_usempi.so.20 && ldconfig
 RUN useradd munge -m && useradd slurm -m && mkdir /tmp/slurm && chown slurm:slurm -R /tmp/slurm
 
 COPY scripts/munged.sh /scripts/munged.sh
