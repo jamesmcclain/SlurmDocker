@@ -107,7 +107,7 @@ where `INSTANCE_PROFILE`, `SECURITY_GROUP`, and `KEYPAIR` are appropriately subs
    - `INSTANCE_PROFILE` should be the name of an instance profile that gives instances sufficient priviledges to use the AWS CLI tools.
 That is necessary because the [boostrap script](scripts/bootstrap.sh.template) uses AWS CLI to determine the name of the leader and the names of the other nodes in the cluster.
 A role with the policy `AmazonEC2ReadOnlyAccess` should be sufficient.
-   - `SECURITY_GROUP` should be the name of a security group that allows intra-VPC traffic on ports 6817, 6818, and [33009 through 33013](config/slurm.conf.template#L57), as well as SSH access to the leader from your location.
+   - `SECURITY_GROUP` should be the name of a security group that allows intra-VPC traffic on all ports, as well as SSH access to the leader from your location.
    - `KEYPAIR` is the name of the keypair that you will use to SSH into the lead node.
 
 By default, one leader node (with a control daemon as well as a regular slurm daemon running on it) will be created,
@@ -177,6 +177,35 @@ root@ip-172-31-42-161:/#
 ### Stop ###
 
 To stop the cluster, type `make stop-ec2`.
+
+# OpenMPI and Coarray Fortran #
+
+This image can be used to run OpenMPI and Coarray Fortran codes locally and on AWS.
+Given an already-compiled MPI or [Coarray Fortran program](https://gcc.gnu.org/wiki/CoarrayExample) located at `/tmp/a.out` in the contianer,
+the process looks something like this (after having shelled-in to the container on the lead node).
+```
+root@ip-172-31-22-7:/tmp# salloc -n 3
+salloc: Granted job allocation 107
+root@ip-172-31-22-7:/tmp# sbcast a.out hello
+root@ip-172-31-22-7:/tmp# srun hello
+Hello James from image 2
+Enter your name: Hello James from image 1
+Hello James from image 3
+root@ip-172-31-22-7:/tmp# srun hello
+Enter your name: Hello James from image 1
+Hello James from image 2
+Hello James from image 3
+root@ip-172-31-22-7:/tmp# exit
+salloc: Relinquishing job allocation 107
+root@ip-172-31-22-7:/tmp#
+```
+Note that it is necessary to first broadcast the executable to all of the nodes because by default they do not have shared storage.
+After that, it is possible to [run the MPI program using srun](https://slurm.schedmd.com/mpi_guide.html).
+
+By way of compatibility, it is important to remember that the image contains shared runtime libraries for gfortran 6.3.x and OpenMPI 2.1.1.
+It probably makes sense to try to link any executables [as statically as possible](https://stackoverflow.com/questions/4156055/gcc-static-linking-only-some-libraries) to avoid difficulties.
+Unfortunately, it does not currently appear that executables can be fully static because certain OpenMPI libraries seem to require dynamic linking.
+
 
 # License #
 
